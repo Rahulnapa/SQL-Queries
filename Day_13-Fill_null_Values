@@ -1,0 +1,27 @@
+------------------------------ DDL Statement:
+create table brands 
+(
+category varchar(20),
+brand_name varchar(20)
+);
+
+------------------------------ INSERT
+insert into brands values
+('chocolates','5-star')
+,(null,'dairy milk')
+,(null,'perk')
+,(null,'eclair')
+,('Biscuits','britannia')
+,(null,'good day')
+,(null,'boost');
+
+------------------------------ Solution
+with cte as (
+  select *,row_number() over(order by (select null)) rn from brands
+),
+cte2 as (
+  select *,lead(rn,1,9999) over(order by rn) rn2 from cte where category is not null
+)
+select cte2.category,cte.brand_name from cte 
+inner join cte2 on cte.rn>= cte2.rn and cte.rn<=cte2.rn2-1
+order by cte.rn
