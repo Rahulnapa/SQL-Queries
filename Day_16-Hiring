@@ -1,0 +1,25 @@
+------------------ DDL statement
+create table candidates (
+emp_id int,
+experience varchar(20),
+salary int
+);
+
+------------------- INSERT statement
+insert into candidates values
+(1,'Junior',10000),(2,'Junior',15000),(3,'Junior',40000),(4,'Senior',16000),(5,'Senior',20000),(6,'Senior',50000);
+
+
+
+--------------------- Solution
+with cte as (
+select *,sum(salary) over(partition by experience order by salary asc) cumm_salary 
+  from candidates
+),
+senior as (
+  select * from cte where experience = 'Senior' and cumm_salary <= 70000)
+  ,junior as 
+(select * from cte where experience = 'Junior' and cumm_salary <= 70000 - (select sum(salary) from senior)
+ )
+select * from junior
+
