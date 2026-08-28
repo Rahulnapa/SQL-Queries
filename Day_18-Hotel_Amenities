@@ -1,0 +1,22 @@
+----------------- DDL Statement
+create table hotel(
+rental_id int ,
+amenities varchar(20)
+);
+------------------ Insert statement
+insert into hotel values (123, 'Pool'),
+(123, 'Kitchen'),
+(234, 'Hot Tub'),
+(234, 'Fireplace'),
+(345, 'Kitchen'),
+(345, 'Pool'),
+(456, 'Pool');
+
+
+------------------ Solution
+with cte as( 
+select rental_id,array_agg(amenities order by amenities) amen from hotel
+group by rental_id
+)
+select count(*) from cte a 
+inner join cte b on a.amen = b.amen and a.rental_id <> b.rental_id
