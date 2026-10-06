@@ -1,0 +1,43 @@
+------------- Problem
+Merge overlapping events in the same hall
+
+------------- DDL Statement
+create table hall_events
+(
+hall_id integer,
+start_date date,
+end_date date
+);
+
+------------- INSERT statement
+insert into hall_events values 
+(1,'2023-01-13','2023-01-14')
+,(1,'2023-01-14','2023-01-17')
+,(1,'2023-01-15','2023-01-17')
+,(1,'2023-01-18','2023-01-25')
+,(2,'2022-12-09','2022-12-23')
+,(2,'2022-12-13','2022-12-17')
+,(3,'2022-12-01','2023-01-30');
+
+
+------------- Solution
+with cte as (
+select 
+hall_id,start_date,end_date,
+lag(start_date) over (partition by hall_id order by start_date) prev_start_date,
+lag(end_date) over (partition by hall_id order by start_date,end_date) prev_end_date
+from hall_events
+),
+cte2 as 
+(select hall_id,start_date,end_date,
+sum(case when (start_date between prev_start_date and prev_end_date) 
+or 
+(end_date between prev_start_date and prev_end_date) then 0 else 1 end)
+over(partition by hall_id order by start_date, end_date) as val
+from cte),
+cte3 as (
+select hall_id, val, min(start_date),max(end_date) from cte2
+group by hall_id,val
+order by hall_id
+)
+select hall_id,min,max from cte3
